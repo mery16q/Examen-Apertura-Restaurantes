@@ -26,13 +26,13 @@ export default function RestaurantsScreen ({ navigation, route }) {
     }
   }, [loggedInUser, route])
 
-  const changedStatus = async (restaurant) => {
+  const changedStatus = async (item) => {
     try {
-      await changeStatus(restaurant.id)
+      await changeStatus(item.id)
       await fetchRestaurants()
 
       showMessage({
-        message: `Restaurant ${restaurant.name} succesfully change its status`,
+        message: `Restaurant ${item.name} succesfully change its status`,
         type: 'success',
         style: GlobalStyles.flashStyle,
         titleStyle: GlobalStyles.flashTextStyle
