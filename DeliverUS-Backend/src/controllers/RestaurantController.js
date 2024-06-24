@@ -95,12 +95,28 @@ const destroy = async function (req, res) {
   }
 }
 
+const promoted = async function (req, res) {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    if (restaurant.status === 'offline') {
+      restaurant.status = 'online'
+    } else if (restaurant.status === 'online') {
+      restaurant.status = 'offline'
+    }
+    await restaurant.save()
+    res.json(restaurant)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const RestaurantController = {
   index,
   indexOwner,
   create,
   show,
   update,
-  destroy
+  destroy,
+  promoted
 }
 export default RestaurantController

@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { StyleSheet, FlatList, Pressable, View } from 'react-native'
 
-import { getAll, remove } from '../../api/RestaurantEndpoints'
+import { getAll, remove, changeStatus } from '../../api/RestaurantEndpoints'
 import ImageCard from '../../components/ImageCard'
 import TextSemiBold from '../../components/TextSemibold'
 import TextRegular from '../../components/TextRegular'
@@ -25,6 +25,28 @@ export default function RestaurantsScreen ({ navigation, route }) {
       setRestaurants(null)
     }
   }, [loggedInUser, route])
+
+  const changedStatus = async (restaurant) => {
+    try {
+      await changeStatus(restaurant.id)
+      await fetchRestaurants()
+
+      showMessage({
+        message: `Restaurant ${restaurant.name} succesfully change its status`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (error) {
+      console.log(error)
+      showMessage({
+        message: `Restaurant ${restaurant.name}'s status could not be change.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
 
   const renderRestaurant = ({ item }) => {
     return (
@@ -59,7 +81,6 @@ export default function RestaurantsScreen ({ navigation, route }) {
             </TextRegular>
           </View>
         </Pressable>
-
         <Pressable
             onPress={() => { setRestaurantToBeDeleted(item) }}
             style={({ pressed }) => [
@@ -77,6 +98,26 @@ export default function RestaurantsScreen ({ navigation, route }) {
             </TextRegular>
           </View>
         </Pressable>
+        {item.status !== 'closed' && item.status !== 'temporarily closed' &&
+        <Pressable
+        onPress={() => { changedStatus(item) }}
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed
+              ? GlobalStyles.brandGreenTap
+              : GlobalStyles.brandGreen
+          },
+          styles.actionButton
+        ]}
+        >
+          <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+            <MaterialCommunityIcons name='account-clock-outline' color={'white'} size={20}/>
+            <TextRegular textStyle={styles.text}>
+              {item.status}
+            </TextRegular>
+          </View>
+        </Pressable>
+  }
         </View>
       </ImageCard>
     )
@@ -191,11 +232,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 40,
     marginTop: 12,
-    margin: '1%',
     padding: 10,
     alignSelf: 'center',
     flexDirection: 'column',
-    width: '50%'
+    width: '33%'
   },
   actionButtonsContainer: {
     flexDirection: 'row',
